@@ -1,0 +1,6 @@
+{
+  "name": "network-ping-monitor",
+  "version": "1.0.0",
+  "description": "Routine network health checks",
+  "private": false
+}
