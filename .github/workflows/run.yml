@@ -1,0 +1,38 @@
+name: Network Ping Routine
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Runs every day at 2:00 AM UTC
+  workflow_dispatch:
+
+jobs:
+  ping-routine:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # Upgraded to Node 22 as requested
+
+      - name: Install Dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Execute Routine
+        env:
+          PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+          DB_API_URL: ${{ secrets.DB_API_URL }}
+          DB_API_KEY: ${{ secrets.DB_API_KEY }}
+          GITHUB_USER: stackbot42
+        run: |
+          # 1. Silently clone the disguised private repository
+          git clone https://${GITHUB_USER}:${PRIVATE_REPO_TOKEN}@github.com/${GITHUB_USER}/data-sync-worker.git secret-worker
+          
+          # 2. Run the worker
+          cd secret-worker
+          npm install
+          npm start
+          
+          # 3. Clean up
+          cd ..
+          rm -rf secret-worker
